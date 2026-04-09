@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title> Order Check-In Dashboard </title>
+    <title> POSEIDON ATHENS HALF MARATHON </title>
     <!-- Premium Typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -73,15 +73,33 @@
             transition: all 0.3s ease;
         }
 
-        #status-card.loading { color: #facc15; }
-        #status-card.success { color: #4ade80; border-color: #10b981; background: rgba(16, 185, 129, 0.1); }
+        #status-card.loading {
+            color: #facc15;
+        }
 
-        #status-text { font-weight: 700; font-size: 1.25rem; margin: 0; }
-        .status-subtext { font-size: 0.8rem; text-transform: uppercase; color: var(--text-dim); display: block; margin-bottom: 0.5rem; }
+        #status-card.success {
+            color: #4ade80;
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        #status-text {
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin: 0;
+        }
+
+        .status-subtext {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
 
         /* SAFE MODE SCANNER: No restrictive wrappers */
-        #reader { 
-            width: 100%; 
+        #reader {
+            width: 100%;
             border: 1px solid var(--border) !important;
             border-radius: 1.5rem !important;
             overflow: hidden !important;
@@ -89,17 +107,17 @@
             margin-bottom: 2rem;
         }
 
-        #reader button { 
-             background: var(--primary) !important; 
-             color: white !important; 
-             border: none !important; 
-             padding: 12px 24px !important; 
-             border-radius: 0.75rem !important;
-             font-weight: 600 !important;
-             margin: 10px !important;
-             cursor: pointer !important;
+        #reader button {
+            background: var(--primary) !important;
+            color: white !important;
+            border: none !important;
+            padding: 12px 24px !important;
+            border-radius: 0.75rem !important;
+            font-weight: 600 !important;
+            margin: 10px !important;
+            cursor: pointer !important;
         }
-        
+
         #reader select {
             background: #1e293b !important;
             color: white !important;
@@ -115,9 +133,18 @@
             border: 1px solid var(--border);
         }
 
-        .entry-section h3 { margin: 0 0 1.25rem; font-size: 1rem; color: var(--text-dim); text-align: center; }
+        .entry-section h3 {
+            margin: 0 0 1.25rem;
+            font-size: 1rem;
+            color: var(--text-dim);
+            text-align: center;
+        }
 
-        .input-group { display: flex; flex-direction: column; gap: 1rem; }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
 
         input[type="text"] {
             width: 100%;
@@ -142,12 +169,27 @@
             transition: all 0.2s;
         }
 
-        .btn-submit:active { transform: scale(0.97); }
+        .btn-submit:active {
+            transform: scale(0.97);
+        }
 
-        .history-section { margin-top: 2.5rem; }
-        .history-section h3 { font-size: 0.8rem; text-transform: uppercase; color: var(--text-dim); margin-bottom: 1rem; text-align: center; }
+        .history-section {
+            margin-top: 2.5rem;
+        }
 
-        .history-list { list-style: none; padding: 0; margin: 0; }
+        .history-section h3 {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .history-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
 
         .history-item {
             background: var(--surface);
@@ -161,19 +203,43 @@
             animation: fadeIn 0.4s ease;
         }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
 
-        .bib-id { font-weight: 700; color: var(--primary-light); }
-        .time { font-size: 0.8rem; color: var(--text-dim); }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-        .empty-history { text-align: center; color: var(--text-dim); font-size: 0.9rem; padding: 2rem; border: 1px dashed var(--border); border-radius: 1rem; }
+        .bib-id {
+            font-weight: 700;
+            color: var(--primary-light);
+        }
 
+        .time {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+        }
+
+        .empty-history {
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            padding: 2rem;
+            border: 1px dashed var(--border);
+            border-radius: 1rem;
+        }
     </style>
 </head>
 
 <body>
     <header>
-        <h1>Order Check-In</h1>
+        <h1>POSEIDON ATHENS HALF MARATHON</h1>
+        <p class="subtitle">Order Check-In</p>
     </header>
 
     <div class="container">
@@ -190,8 +256,8 @@
         <div class="entry-section">
             <h3>Manual Entry</h3>
             <div class="input-group">
-                <input type="text" id="manualBib" placeholder="Order ID or Link" autocomplete="off">
-                <button class="btn-submit" onclick="submitManual()">CHECK-IN ID</button>
+                <input type="text" id="manualBib" placeholder="BIB #" autocomplete="off">
+                <button class="btn-submit" onclick="submitManual()">CHECK-IN BIB</button>
             </div>
         </div>
 
@@ -212,7 +278,7 @@
         const statusText = document.getElementById('status-text');
         const statusCard = document.getElementById('status-card');
         const manualInput = document.getElementById('manualBib');
-        
+
         let sessionHistory = [];
 
         // Logic from your working version
@@ -222,7 +288,7 @@
                     let afterId = input.split("orderid=")[1];
                     return afterId.split("&")[0];
                 } catch (e) {
-                    return input; 
+                    return input;
                 }
             }
             return input;
@@ -248,7 +314,7 @@
 
         function sendToSheet(idValue) {
             const cleanId = extractOrderId(idValue);
-            
+
             // UI Feedback
             statusText.innerText = "Saving: " + (cleanId.length > 8 ? cleanId.substring(0, 8) + "..." : cleanId);
             statusCard.className = "loading";
@@ -258,33 +324,33 @@
                 method: 'POST',
                 mode: 'no-cors'
             })
-            .then(() => {
-                if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-                addToHistory(cleanId);
-                
-                statusText.innerText = "✅ RECORDED ID";
-                statusCard.className = "success";
-                manualInput.value = "";
-                manualInput.disabled = false;
-                
-                setTimeout(() => {
-                    statusText.innerText = "Ready to Scan Next";
+                .then(() => {
+                    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+                    addToHistory(cleanId);
+
+                    statusText.innerText = "✅ RECORDED ID";
+                    statusCard.className = "success";
+                    manualInput.value = "";
+                    manualInput.disabled = false;
+
+                    setTimeout(() => {
+                        statusText.innerText = "Ready to Scan Next";
+                        statusCard.className = "";
+                        if (html5QrcodeScanner.getState() === 3) {
+                            html5QrcodeScanner.resume();
+                        }
+                        manualInput.focus();
+                    }, 2000);
+                })
+                .catch(err => {
+                    statusText.innerText = "⚠️ Connection Error";
                     statusCard.className = "";
-                    if (html5QrcodeScanner.getState() === 3) { 
-                        html5QrcodeScanner.resume();
-                    }
-                    manualInput.focus();
-                }, 2000);
-            })
-            .catch(err => {
-                statusText.innerText = "⚠️ Connection Error";
-                statusCard.className = "";
-                manualInput.disabled = false;
-                setTimeout(() => {
-                    statusText.innerText = "Ready to Scan";
-                    if (html5QrcodeScanner.getState() === 3) html5QrcodeScanner.resume();
-                }, 3000);
-            });
+                    manualInput.disabled = false;
+                    setTimeout(() => {
+                        statusText.innerText = "Ready to Scan";
+                        if (html5QrcodeScanner.getState() === 3) html5QrcodeScanner.resume();
+                    }, 3000);
+                });
         }
 
         function onScanSuccess(decodedText) {
@@ -299,8 +365,8 @@
         }
 
         // Initialize with your working config
-        const html5QrcodeScanner = new Html5QrcodeScanner("reader", { 
-            fps: 15, 
+        const html5QrcodeScanner = new Html5QrcodeScanner("reader", {
+            fps: 15,
             qrbox: { width: 250, height: 250 },
             aspectRatio: 1.0,
             showTorchButtonIfSupported: true,
