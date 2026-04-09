@@ -206,7 +206,7 @@
     </div>
 
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbzS2RnascyNXTpzhxy1SX-b1JGJPn3sbktz7DqPLDeD9D8k0u3H8Phm5F6wO76L_gI/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbyPGQR2oCT8IF0cUy3SeejgDMCeDuJw5StXvZsFnKb1JU-mLLmiRUqLgPS_8w_Rnuk/exec";
         const historyList = document.getElementById('history-list');
         const emptyHistory = document.querySelector('.empty-history');
         const statusText = document.getElementById('status-text');
@@ -270,7 +270,7 @@
                 setTimeout(() => {
                     statusText.innerText = "Ready to Scan Next";
                     statusCard.className = "";
-                    if (html5QrcodeScanner.getState() === 2) { 
+                    if (html5QrcodeScanner.getState() === 3) { 
                         html5QrcodeScanner.resume();
                     }
                     manualInput.focus();
@@ -282,7 +282,7 @@
                 manualInput.disabled = false;
                 setTimeout(() => {
                     statusText.innerText = "Ready to Scan";
-                    if (html5QrcodeScanner.getState() === 2) html5QrcodeScanner.resume();
+                    if (html5QrcodeScanner.getState() === 3) html5QrcodeScanner.resume();
                 }, 3000);
             });
         }
