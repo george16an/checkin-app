@@ -319,7 +319,7 @@
             `).join('');
         }
 
-        async function sendToDatabase(idValue) {
+        async function sendToDatabase(idValue, source = 'scan') {
             const cleanId = extractOrderId(idValue);
 
             // UI Feedback
@@ -328,16 +328,26 @@
             manualInput.disabled = true;
 
             try {
+                // Prepare data object based on source
+                // 'scan' -> order_id column
+                // 'manual' -> bib_id column
+                const payload = {};
+                if (source === 'scan') {
+                    payload.order_id = cleanId;
+                } else {
+                    payload.bib_id = cleanId;
+                }
+
                 const { data, error } = await supabaseClient
                     .from('checkins')
-                    .insert([{ bib_id: cleanId }]);
+                    .insert([payload]);
 
                 if (error) throw error;
 
                 if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
                 addToHistory(cleanId);
 
-                statusText.innerText = "✅ RECORDED IN DATABASE";
+                statusText.innerText = "✅ RECORDED AS " + (source === 'scan' ? "ORDER" : "BIB");
                 statusCard.className = "success";
                 manualInput.value = "";
                 manualInput.disabled = false;
@@ -366,13 +376,13 @@
 
         function onScanSuccess(decodedText) {
             html5QrcodeScanner.pause();
-            sendToDatabase(decodedText);
+            sendToDatabase(decodedText, 'scan');
         }
 
         function submitManual() {
             const val = manualInput.value.trim();
             if (val === "") return;
-            sendToDatabase(val);
+            sendToDatabase(val, 'manual');
         }
 
         // Initialize with your working config
