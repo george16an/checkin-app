@@ -488,7 +488,7 @@
                 statusText.innerText = "Initializing OCR...";
                 worker = await Tesseract.createWorker('eng');
                 await worker.setParameters({
-                    tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+                    tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ:',
                 });
                 statusText.innerText = "Ready to Scan";
             }
@@ -543,14 +543,24 @@
 
             try {
                 const { data: { text } } = await worker.recognize(roiCanvas);
-                const cleanedText = text.replace(/[^0-9A-Z]/g, '').trim();
                 
-                if (cleanedText.length > 0) {
-                    sendToSheet(cleanedText);
+                // Look for "BIB:" followed by a number/code
+                const bibMatch = text.match(/BIB[\s:]+([0-9A-Z]+)/i);
+                
+                if (bibMatch && bibMatch[1]) {
+                    const bibValue = bibMatch[1].trim();
+                    sendToSheet(bibValue);
                 } else {
-                    statusText.innerText = "❌ No text found";
-                    statusCard.className = "";
-                    setTimeout(() => statusText.innerText = "Try Aligning Again", 2000);
+                    // Fallback: If no "BIB:" found, try to find any alphanumeric string 
+                    // that looks like an ID (optional, but safer for messy labels)
+                    const fallbackMatch = text.replace(/[^0-9A-Z]/g, '').trim();
+                    if (fallbackMatch.length > 0) {
+                        sendToSheet(fallbackMatch);
+                    } else {
+                        statusText.innerText = "❌ No BIB found";
+                        statusCard.className = "";
+                        setTimeout(() => statusText.innerText = "Align 'BIB:' in Box", 2000);
+                    }
                 }
             } catch (err) {
                 console.error(err);
