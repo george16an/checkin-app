@@ -51,6 +51,7 @@
             font-weight: 700;
             background: linear-gradient(to right, #60a5fa, #2563eb);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
             letter-spacing: -0.02em;
         }
@@ -283,8 +284,8 @@
         }
 
         .ocr-guide {
-            width: 80%;
-            height: 100px;
+            width: 95%;
+            height: 80px;
             border: 2px solid var(--primary);
             border-radius: 1rem;
             box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.6);
@@ -488,7 +489,7 @@
                 statusText.innerText = "Initializing OCR...";
                 worker = await Tesseract.createWorker('eng');
                 await worker.setParameters({
-                    tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ:',
+                    tessedit_char_whitelist: '0123456789:BIBL8',
                 });
                 statusText.innerText = "Ready to Scan";
             }
@@ -539,25 +540,31 @@
             roiCanvas.width = roiWidth;
             roiCanvas.height = roiHeight;
             const roiCtx = roiCanvas.getContext('2d');
+            
+            // Image Processing for better OCR
+            roiCtx.filter = 'grayscale(100%) contrast(150%) brightness(120%)';
             roiCtx.drawImage(canvas, roiX, roiY, roiWidth, roiHeight, 0, 0, roiWidth, roiHeight);
 
             try {
                 const { data: { text } } = await worker.recognize(roiCanvas);
+                console.log("OCR Raw:", text);
                 
-                // Look for "BIB:" followed by a number/code
-                const bibMatch = text.match(/BIB[\s:]+([0-9A-Z]+)/i);
+                // Robust Regex: Looks for BIB (or similar OCR mistakes) followed by digits
+                // User confirmed digits only.
+                const bibMatch = text.match(/(?:BIB|B1B|BlB|8IB)[\s:]*([0-9]+)/i);
                 
                 if (bibMatch && bibMatch[1]) {
                     const bibValue = bibMatch[1].trim();
                     sendToSheet(bibValue);
                 } else {
-                    // Fallback: If no "BIB:" found, try to find any alphanumeric string 
-                    // that looks like an ID (optional, but safer for messy labels)
-                    const fallbackMatch = text.replace(/[^0-9A-Z]/g, '').trim();
-                    if (fallbackMatch.length > 0) {
-                        sendToSheet(fallbackMatch);
+                    // Fallback: Find the most likely number (3-5 digits) 
+                    const numbers = text.match(/[0-9]{3,5}/g);
+                    if (numbers && numbers.length > 0) {
+                        // If multiple, pick the one not equal to other known labels if possible
+                        // But for now, just the first significant number found
+                        sendToSheet(numbers[0]);
                     } else {
-                        statusText.innerText = "❌ No BIB found";
+                        statusText.innerText = "❌ No numbers found";
                         statusCard.className = "";
                         setTimeout(() => statusText.innerText = "Align 'BIB:' in Box", 2000);
                     }
