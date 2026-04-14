@@ -41,19 +41,44 @@
         }
 
         header {
-            padding: 2.5rem 1.5rem 1rem;
+            padding: 3rem 1.5rem 1.5rem;
             text-align: center;
+            background: linear-gradient(180deg, rgba(37, 99, 235, 0.1) 0%, transparent 100%);
         }
 
         h1 {
             margin: 0;
-            font-size: 1.75rem;
-            font-weight: 700;
-            background: linear-gradient(to right, #60a5fa, #2563eb);
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(to right, #60a5fa, #2563eb, #60a5fa);
+            background-size: 200% auto;
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
             letter-spacing: -0.02em;
+            text-transform: uppercase;
+            animation: shine 4s linear infinite;
+        }
+
+        @keyframes shine {
+            to { background-position: 200% center; }
+        }
+
+        .subtitle {
+            margin: 0.5rem 0 0;
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            font-weight: 500;
+            letter-spacing: 0.05em;
+        }
+
+        .event-greek {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--primary-light);
+            margin-bottom: 0.25rem;
+            font-weight: 600;
+            opacity: 0.8;
         }
 
         .container {
@@ -337,8 +362,9 @@
 
 <body>
     <header>
-        <h1>POSEIDON ATHENS HALF MARATHON</h1>
-        <p class="subtitle">Order Check-In</p>
+        <span class="event-greek">17ος ΔΙΕΘΝΗΣ ΠΟΣΕΙΔΩΝΙΟΣ ΗΜΙΜΑΡΑΘΩΝΙΟΣ</span>
+        <h1>Poseidon Athens<br>Half Marathon</h1>
+        <p class="subtitle">STAFF CHECK-IN PANEL</p>
     </header>
 
     <div class="container">
