@@ -340,7 +340,10 @@
 
                 const { data, error } = await supabaseClient
                     .from('checkins')
-                    .insert([payload]);
+                    .insert([payload])
+                    .select();
+
+                console.log("Supabase Response:", { data, error });
 
                 if (error) throw error;
 
