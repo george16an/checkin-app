@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --primary: #2563eb;
@@ -272,7 +273,13 @@
     </div>
 
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbyPGQR2oCT8IF0cUy3SeejgDMCeDuJw5StXvZsFnKb1JU-mLLmiRUqLgPS_8w_Rnuk/exec";
+        // Supabase Configuration
+        const SUPABASE_URL = "https://viftrlmjafotgehkxsto.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZpZnRybG1qYWZvdGdlaGt4c3RvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxOTIzMjEsImV4cCI6MjA5MTc2ODMyMX0.tx7PanV9UPTN2IAmGg1QtAfvNmqRYfJOqyb09OIm3ks";
+        
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
         const historyList = document.getElementById('history-list');
         const emptyHistory = document.querySelector('.empty-history');
         const statusText = document.getElementById('status-text');
@@ -312,56 +319,60 @@
             `).join('');
         }
 
-        function sendToSheet(idValue) {
+        async function sendToDatabase(idValue) {
             const cleanId = extractOrderId(idValue);
 
             // UI Feedback
-            statusText.innerText = "Saving: " + (cleanId.length > 8 ? cleanId.substring(0, 8) + "..." : cleanId);
+            statusText.innerText = "Syncing: " + (cleanId.length > 8 ? cleanId.substring(0, 8) + "..." : cleanId);
             statusCard.className = "loading";
             manualInput.disabled = true;
 
-            fetch(`${API_URL}?id=${encodeURIComponent(cleanId)}`, {
-                method: 'POST',
-                mode: 'no-cors'
-            })
-                .then(() => {
-                    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-                    addToHistory(cleanId);
+            try {
+                const { data, error } = await supabaseClient
+                    .from('checkins')
+                    .insert([{ bib_id: cleanId }]);
 
-                    statusText.innerText = "✅ RECORDED ID";
-                    statusCard.className = "success";
-                    manualInput.value = "";
-                    manualInput.disabled = false;
+                if (error) throw error;
 
-                    setTimeout(() => {
-                        statusText.innerText = "Ready to Scan Next";
-                        statusCard.className = "";
-                        if (html5QrcodeScanner.getState() === 3) {
-                            html5QrcodeScanner.resume();
-                        }
-                        manualInput.focus();
-                    }, 2000);
-                })
-                .catch(err => {
-                    statusText.innerText = "⚠️ Connection Error";
+                if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+                addToHistory(cleanId);
+
+                statusText.innerText = "✅ RECORDED IN DATABASE";
+                statusCard.className = "success";
+                manualInput.value = "";
+                manualInput.disabled = false;
+
+                setTimeout(() => {
+                    statusText.innerText = "Ready to Scan Next";
                     statusCard.className = "";
-                    manualInput.disabled = false;
-                    setTimeout(() => {
-                        statusText.innerText = "Ready to Scan";
-                        if (html5QrcodeScanner.getState() === 3) html5QrcodeScanner.resume();
-                    }, 3000);
-                });
+                    if (html5QrcodeScanner.getState() === 3) {
+                        html5QrcodeScanner.resume();
+                    }
+                    manualInput.focus();
+                }, 2000);
+
+            } catch (err) {
+                console.error("Database Error:", err);
+                statusText.innerText = "⚠️ Sync Error: " + (err.message || "Unknown");
+                statusCard.className = "";
+                manualInput.disabled = false;
+                
+                setTimeout(() => {
+                    statusText.innerText = "Ready to Scan";
+                    if (html5QrcodeScanner.getState() === 3) html5QrcodeScanner.resume();
+                }, 3000);
+            }
         }
 
         function onScanSuccess(decodedText) {
             html5QrcodeScanner.pause();
-            sendToSheet(decodedText);
+            sendToDatabase(decodedText);
         }
 
         function submitManual() {
             const val = manualInput.value.trim();
             if (val === "") return;
-            sendToSheet(val);
+            sendToDatabase(val);
         }
 
         // Initialize with your working config
