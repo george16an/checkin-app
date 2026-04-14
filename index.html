@@ -10,7 +10,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/html5-qrcode"></script>
-    <script src="https://unpkg.com/tesseract.js@5.1.0/dist/tesseract.min.js"></script>
     <style>
         :root {
             --primary: #2563eb;
@@ -41,44 +40,18 @@
         }
 
         header {
-            padding: 3rem 1.5rem 1.5rem;
+            padding: 2.5rem 1.5rem 1rem;
             text-align: center;
-            background: linear-gradient(180deg, rgba(37, 99, 235, 0.1) 0%, transparent 100%);
         }
 
         h1 {
             margin: 0;
-            font-size: 1.5rem;
-            font-weight: 800;
-            background: linear-gradient(to right, #60a5fa, #2563eb, #60a5fa);
-            background-size: 200% auto;
+            font-size: 1.75rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #60a5fa, #2563eb);
             -webkit-background-clip: text;
-            background-clip: text;
             -webkit-text-fill-color: transparent;
             letter-spacing: -0.02em;
-            text-transform: uppercase;
-            animation: shine 4s linear infinite;
-        }
-
-        @keyframes shine {
-            to { background-position: 200% center; }
-        }
-
-        .subtitle {
-            margin: 0.5rem 0 0;
-            font-size: 0.9rem;
-            color: var(--text-dim);
-            font-weight: 500;
-            letter-spacing: 0.05em;
-        }
-
-        .event-greek {
-            display: block;
-            font-size: 0.75rem;
-            color: var(--primary-light);
-            margin-bottom: 0.25rem;
-            font-weight: 600;
-            opacity: 0.8;
         }
 
         .container {
@@ -260,111 +233,13 @@
             border: 1px dashed var(--border);
             border-radius: 1rem;
         }
-        /* NEW SCANNER MODES */
-        .mode-selector {
-            display: flex;
-            background: var(--surface);
-            border-radius: 1rem;
-            padding: 0.5rem;
-            margin-bottom: 1.5rem;
-            border: 1px solid var(--border);
-            gap: 0.5rem;
-        }
-
-        .mode-btn {
-            flex: 1;
-            padding: 0.8rem;
-            border-radius: 0.7rem;
-            border: none;
-            background: transparent;
-            color: var(--text-dim);
-            font-weight: 600;
-            font-family: inherit;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-
-        .mode-btn.active {
-            background: var(--primary);
-            color: white;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-        }
-
-        #ocr-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-        }
-
-        .ocr-guide {
-            width: 95%;
-            height: 80px;
-            border: 2px solid var(--primary);
-            border-radius: 1rem;
-            box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.6);
-            position: relative;
-        }
-
-        .ocr-guide::after {
-            content: "ALIGN BIB LABEL HERE";
-            position: absolute;
-            bottom: -30px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: var(--primary-light);
-            font-size: 0.75rem;
-            font-weight: 700;
-            white-space: nowrap;
-        }
-
-        #reader-container {
-            position: relative;
-            margin-bottom: 2rem;
-            overflow: hidden;
-            border-radius: 1.5rem;
-            border: 1px solid var(--border);
-        }
-
-        #ocr-capture-btn {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 11;
-            padding: 1rem 2rem;
-            border-radius: 1rem;
-            background: var(--primary);
-            color: white;
-            border: none;
-            font-weight: 700;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            display: none;
-            cursor: pointer;
-        }
-
-        #ocr-capture-btn:active {
-            transform: translateX(-50%) scale(0.95);
-        }
     </style>
 </head>
 
 <body>
     <header>
-        <span class="event-greek">17ος ΔΙΕΘΝΗΣ ΠΟΣΕΙΔΩΝΙΟΣ ΗΜΙΜΑΡΑΘΩΝΙΟΣ</span>
-        <h1>Poseidon Athens<br>Half Marathon</h1>
-        <p class="subtitle">STAFF CHECK-IN PANEL</p>
+        <h1>POSEIDON ATHENS HALF MARATHON</h1>
+        <p class="subtitle">Order Check-In</p>
     </header>
 
     <div class="container">
@@ -374,24 +249,8 @@
             <p id="status-text">Ready to Scan</p>
         </div>
 
-        <!-- Mode Selector -->
-        <div class="mode-selector">
-            <button class="mode-btn active" id="qr-mode-btn" onclick="setMode('qr')">
-                <span>🔍</span> QR SCAN
-            </button>
-            <button class="mode-btn" id="ocr-mode-btn" onclick="setMode('ocr')">
-                <span>📝</span> LABEL OCR
-            </button>
-        </div>
-
         <!-- Safe Scanner Container -->
-        <div id="reader-container">
-            <div id="reader"></div>
-            <div id="ocr-overlay">
-                <div class="ocr-guide"></div>
-            </div>
-            <button id="ocr-capture-btn" onclick="captureAndOCR()">CAPTURE & PROCESS</button>
-        </div>
+        <div id="reader"></div>
 
         <!-- Manual Entry Dashboard -->
         <div class="entry-section">
@@ -506,103 +365,7 @@
         }
 
         // Initialize with your working config
-        let html5QrcodeScanner = null;
-        let scanMode = 'qr';
-        let worker = null;
-
-        async function initOCR() {
-            if (!worker) {
-                statusText.innerText = "Initializing OCR...";
-                worker = await Tesseract.createWorker('eng');
-                await worker.setParameters({
-                    tessedit_char_whitelist: '0123456789:BIBL8',
-                });
-                statusText.innerText = "Ready to Scan";
-            }
-        }
-
-        function setMode(mode) {
-            scanMode = mode;
-            document.getElementById('qr-mode-btn').classList.toggle('active', mode === 'qr');
-            document.getElementById('ocr-mode-btn').classList.toggle('active', mode === 'ocr');
-            document.getElementById('ocr-overlay').style.display = mode === 'ocr' ? 'flex' : 'none';
-            document.getElementById('ocr-capture-btn').style.display = mode === 'ocr' ? 'block' : 'none';
-
-            if (mode === 'ocr') {
-                initOCR();
-            }
-            
-            statusText.innerText = mode === 'qr' ? "Ready to Scan QR" : "Align Label and Capture";
-        }
-
-        async function captureAndOCR() {
-            const video = document.querySelector('#reader video');
-            if (!video) return;
-
-            statusText.innerText = "Reading Label...";
-            statusCard.className = "loading";
-
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            
-            // Set canvas size to video size
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            
-            // Draw frame to canvas
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-            // Crop to ROI (the guide box area)
-            // The guide is 80% width, 100px height in the center
-            const cropWidth = canvas.width * 0.8;
-            const cropHeight = (canvas.width * 0.8) * (100 / (canvas.width * 0.8 * 0.8)); // proportional to UI
-            // Better: just crop a central strip
-            const roiHeight = canvas.height * 0.3;
-            const roiWidth = canvas.width * 0.8;
-            const roiX = (canvas.width - roiWidth) / 2;
-            const roiY = (canvas.height - roiHeight) / 2;
-
-            const roiCanvas = document.createElement('canvas');
-            roiCanvas.width = roiWidth;
-            roiCanvas.height = roiHeight;
-            const roiCtx = roiCanvas.getContext('2d');
-            
-            // Image Processing for better OCR
-            roiCtx.filter = 'grayscale(100%) contrast(150%) brightness(120%)';
-            roiCtx.drawImage(canvas, roiX, roiY, roiWidth, roiHeight, 0, 0, roiWidth, roiHeight);
-
-            try {
-                const { data: { text } } = await worker.recognize(roiCanvas);
-                console.log("OCR Raw:", text);
-                
-                // Robust Regex: Looks for BIB (or similar OCR mistakes) followed by digits
-                // User confirmed digits only.
-                const bibMatch = text.match(/(?:BIB|B1B|BlB|8IB)[\s:]*([0-9]+)/i);
-                
-                if (bibMatch && bibMatch[1]) {
-                    const bibValue = bibMatch[1].trim();
-                    sendToSheet(bibValue);
-                } else {
-                    // Fallback: Find the most likely number (3-5 digits) 
-                    const numbers = text.match(/[0-9]{3,5}/g);
-                    if (numbers && numbers.length > 0) {
-                        // If multiple, pick the one not equal to other known labels if possible
-                        // But for now, just the first significant number found
-                        sendToSheet(numbers[0]);
-                    } else {
-                        statusText.innerText = "❌ No numbers found";
-                        statusCard.className = "";
-                        setTimeout(() => statusText.innerText = "Align 'BIB:' in Box", 2000);
-                    }
-                }
-            } catch (err) {
-                console.error(err);
-                statusText.innerText = "OCR Error";
-                statusCard.className = "";
-            }
-        }
-
-        html5QrcodeScanner = new Html5QrcodeScanner("reader", {
+        const html5QrcodeScanner = new Html5QrcodeScanner("reader", {
             fps: 15,
             qrbox: { width: 250, height: 250 },
             aspectRatio: 1.0,
@@ -613,6 +376,7 @@
 
         // Auto focus manual input
         window.addEventListener('load', () => manualInput.focus());
+
     </script>
 </body>
 
