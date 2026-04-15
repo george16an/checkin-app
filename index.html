@@ -327,18 +327,32 @@
             return input;
         }
 
-        function getCategory(id) {
+        function getCategory(id, source = 'scan') {
             const firstDigit = id.charAt(0);
-            const mapping = {
-                '1': 'HM',
-                '2': 'RC',
-                '3': 'QM',
-                '4': '5k',
-                '5': 'pw',
-                '6': 'kids',
-                '7': 'ALMA'
-            };
-            return mapping[firstDigit] || 'UNK';
+            
+            if (source === 'scan') {
+                const scanMapping = {
+                    '1': 'HM',
+                    '2': 'RC',
+                    '3': 'QM',
+                    '4': '5k',
+                    '5': 'pw',
+                    '6': 'kids',
+                    '7': 'ALMA'
+                };
+                return scanMapping[firstDigit] || 'UNK';
+            } else {
+                // BIB Mapping
+                const bibMapping = {
+                    '1': 'QM',
+                    '2': 'HM', // User also mentioned ALMA 2
+                    '3': 'KIDS',
+                    '4': 'PW',
+                    '5': '5k'
+                };
+                if (firstDigit === '2') return 'HM'; // or 'ALMA' depending on preference
+                return bibMapping[firstDigit] || 'BIB';
+            }
         }
 
         function addToHistory(idValue, isValid = true, category = '') {
@@ -367,11 +381,10 @@
             
             // Validation & Category logic
             let isValid = true;
-            let category = '';
+            let category = getCategory(cleanId, source);
             
             if (source === 'scan') {
                 isValid = cleanId.endsWith('26');
-                category = getCategory(cleanId);
             }
 
             // UI Feedback
@@ -380,13 +393,16 @@
             manualInput.disabled = true;
 
             try {
-                const payload = {};
+                const payload = {
+                    category: category
+                };
+
                 if (source === 'scan') {
                     payload.order_id = cleanId;
                     payload.is_valid = isValid;
-                    payload.category = category;
                 } else {
                     payload.bib_id = cleanId;
+                    payload.is_valid = true; // Manual BIBs are valid by default
                 }
 
                 const { data, error } = await supabaseClient
@@ -396,11 +412,17 @@
 
                 console.log("Supabase Response:", { data, error });
 
-                if (error) throw error;
+                if (error) {
+                    if (error.message.includes('column "category" does not exist') || 
+                        error.message.includes('column "is_valid" does not exist')) {
+                        throw new Error("Supabase columns 'category' or 'is_valid' missing. Please run the SQL setup.");
+                    }
+                    throw error;
+                }
 
                 if (navigator.vibrate) {
-                    if (!isValid) {
-                        navigator.vibrate([200, 100, 200]); // Longer vibration for invalid
+                    if (!isValid && source === 'scan') {
+                        navigator.vibrate([200, 100, 200]);
                     } else {
                         navigator.vibrate([100]);
                     }
@@ -412,7 +434,7 @@
                     statusText.innerText = "❌ NOT VALID: " + category;
                     statusCard.className = "invalid";
                 } else {
-                    statusText.innerText = "✅ RECORDED AS " + (source === 'scan' ? "ORDER" : "BIB");
+                    statusText.innerText = `✅ RECORDED (${category})`;
                     statusCard.className = "success";
                 }
                 
@@ -426,18 +448,18 @@
                         html5QrcodeScanner.resume();
                     }
                     manualInput.focus();
-                }, !isValid ? 3500 : 2000); // Show invalid message longer
+                }, !isValid && source === 'scan' ? 3500 : 2000);
 
             } catch (err) {
                 console.error("Database Error:", err);
-                statusText.innerText = "⚠️ Sync Error: " + (err.message || "Unknown");
+                statusText.innerText = "⚠️ Error: " + (err.message || "Unknown");
                 statusCard.className = "";
                 manualInput.disabled = false;
                 
                 setTimeout(() => {
                     statusText.innerText = "Ready to Scan";
                     if (html5QrcodeScanner.getState() === 3) html5QrcodeScanner.resume();
-                }, 3000);
+                }, 5000);
             }
         }
 
