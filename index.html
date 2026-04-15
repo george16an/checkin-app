@@ -302,7 +302,7 @@
         // Supabase Configuration
         const SUPABASE_URL = "https://viftrlmjafotgehkxsto.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZpZnRybG1qYWZvdGdlaGt4c3RvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxOTIzMjEsImV4cCI6MjA5MTc2ODMyMX0.tx7PanV9UPTN2IAmGg1QtAfvNmqRYfJOqyb09OIm3ks";
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyBwI6mfZT8BOi52hNtFJIpQ1rtnM8sJwY2RV0cHrZpmh24YUFPB-p7KOqYSnhXGzc/exec";
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzxmoTaGviHuXOf8ETEz50XA3mP0qQl-Y7JEuXL1nbfCYC9A-BK8HVpHdgnlPmjs3U/exec";
         
         const { createClient } = supabase;
         const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -415,11 +415,11 @@
 
                 // Background Sync to Google Sheets
                 try {
+                    // Send as text/plain to avoid preflight issues with no-cors
                     fetch(GOOGLE_SCRIPT_URL, {
                         method: 'POST',
                         mode: 'no-cors',
                         cache: 'no-cache',
-                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ ...payload, source: source })
                     });
                 } catch (gRes) {
