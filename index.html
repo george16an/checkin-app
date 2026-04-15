@@ -84,6 +84,12 @@
             background: rgba(16, 185, 129, 0.1);
         }
 
+        #status-card.invalid {
+            color: #ef4444;
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
         #status-text {
             font-weight: 700;
             font-size: 1.25rem;
@@ -219,6 +225,26 @@
         .bib-id {
             font-weight: 700;
             color: var(--primary-light);
+            display: flex;
+            align-items: center;
+        }
+
+        .category-tag {
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 6px;
+            background: rgba(96, 165, 250, 0.2);
+            color: var(--primary-light);
+            font-weight: 700;
+            margin-right: 12px;
+            border: 1px solid rgba(96, 165, 250, 0.3);
+            letter-spacing: 0.05em;
+        }
+
+        .category-tag.invalid-tag {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+            border-color: rgba(239, 68, 68, 0.3);
         }
 
         .time {
@@ -301,10 +327,24 @@
             return input;
         }
 
-        function addToHistory(idValue) {
+        function getCategory(id) {
+            const firstDigit = id.charAt(0);
+            const mapping = {
+                '1': 'HM',
+                '2': 'RC',
+                '3': 'QM',
+                '4': '5k',
+                '5': 'pw',
+                '6': 'kids',
+                '7': 'ALMA'
+            };
+            return mapping[firstDigit] || 'UNK';
+        }
+
+        function addToHistory(idValue, isValid = true, category = '') {
             const now = new Date();
             const timeStr = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
-            sessionHistory.unshift({ id: idValue, time: timeStr });
+            sessionHistory.unshift({ id: idValue, time: timeStr, isValid, category });
             if (sessionHistory.length > 5) sessionHistory.pop();
             renderHistory();
         }
@@ -312,8 +352,11 @@
         function renderHistory() {
             if (sessionHistory.length > 0 && emptyHistory) emptyHistory.style.display = 'none';
             historyList.innerHTML = sessionHistory.map(item => `
-                <li class="history-item">
-                    <span class="bib-id">#${item.id.substring(0, 10)}${item.id.length > 10 ? '...' : ''}</span>
+                <li class="history-item" style="${!item.isValid ? 'border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.05);' : ''}">
+                    <span class="bib-id">
+                        ${item.category ? `<span class="category-tag ${!item.isValid ? 'invalid-tag' : ''}">${item.category}</span>` : ''}
+                        #${item.id.substring(0, 10)}${item.id.length > 10 ? '...' : ''}
+                    </span>
                     <span class="time">${item.time}</span>
                 </li>
             `).join('');
@@ -321,6 +364,15 @@
 
         async function sendToDatabase(idValue, source = 'scan') {
             const cleanId = extractOrderId(idValue);
+            
+            // Validation & Category logic
+            let isValid = true;
+            let category = '';
+            
+            if (source === 'scan') {
+                isValid = cleanId.endsWith('26');
+                category = getCategory(cleanId);
+            }
 
             // UI Feedback
             statusText.innerText = "Syncing: " + (cleanId.length > 8 ? cleanId.substring(0, 8) + "..." : cleanId);
@@ -328,12 +380,11 @@
             manualInput.disabled = true;
 
             try {
-                // Prepare data object based on source
-                // 'scan' -> order_id column
-                // 'manual' -> bib_id column
                 const payload = {};
                 if (source === 'scan') {
                     payload.order_id = cleanId;
+                    payload.is_valid = isValid;
+                    payload.category = category;
                 } else {
                     payload.bib_id = cleanId;
                 }
@@ -347,11 +398,24 @@
 
                 if (error) throw error;
 
-                if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-                addToHistory(cleanId);
+                if (navigator.vibrate) {
+                    if (!isValid) {
+                        navigator.vibrate([200, 100, 200]); // Longer vibration for invalid
+                    } else {
+                        navigator.vibrate([100]);
+                    }
+                }
+                
+                addToHistory(cleanId, isValid, category);
 
-                statusText.innerText = "✅ RECORDED AS " + (source === 'scan' ? "ORDER" : "BIB");
-                statusCard.className = "success";
+                if (source === 'scan' && !isValid) {
+                    statusText.innerText = "❌ NOT VALID: " + category;
+                    statusCard.className = "invalid";
+                } else {
+                    statusText.innerText = "✅ RECORDED AS " + (source === 'scan' ? "ORDER" : "BIB");
+                    statusCard.className = "success";
+                }
+                
                 manualInput.value = "";
                 manualInput.disabled = false;
 
@@ -362,7 +426,7 @@
                         html5QrcodeScanner.resume();
                     }
                     manualInput.focus();
-                }, 2000);
+                }, !isValid ? 3500 : 2000); // Show invalid message longer
 
             } catch (err) {
                 console.error("Database Error:", err);
