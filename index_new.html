@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title> POSEIDON ATHENS HALF MARATHON - CHECK-IN </title>
+    <!-- Premium Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-light: #60a5fa;
+            --bg: #0f172a;
+            --surface: rgba(30, 41, 59, 1);
+            --border: rgba(255, 255, 255, 0.1);
+            --text: #f8fafc;
+            --text-dim: #94a3b8;
+            --success: #10b981;
+            --warning: #facc15;
+            --error: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Outfit', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        header {
+            padding: 2.5rem 1.5rem 1rem;
+            text-align: center;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.75rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #60a5fa, #2563eb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .container {
+            flex: 1;
+            max-width: 500px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 1rem;
+        }
+
+        #status-card {
+            padding: 1.5rem;
+            border-radius: 1.5rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            margin-bottom: 2rem;
+            text-align: center;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #status-card.loading {
+            color: var(--warning);
+            border-color: var(--warning);
+        }
+
+        #status-card.success {
+            color: #4ade80;
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        #status-card.warning {
+            color: #fbbf24;
+            border-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        #status-card.invalid {
+            color: #ef4444;
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        #status-text {
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin: 0;
+        }
+
+        .status-subtext {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        #reader {
+            width: 100%;
+            border: 1px solid var(--border) !important;
+            border-radius: 1.5rem !important;
+            overflow: hidden !important;
+            background: #000;
+            margin-bottom: 2rem;
+        }
+
+        #reader button {
+            background: var(--primary) !important;
+            color: white !important;
+            border: none !important;
+            padding: 12px 24px !important;
+            border-radius: 0.75rem !important;
+            font-weight: 600 !important;
+            margin: 10px !important;
+            cursor: pointer !important;
+        }
+
+        #reader select {
+            background: #1e293b !important;
+            color: white !important;
+            padding: 10px !important;
+            border-radius: 0.75rem !important;
+            border: 1px solid var(--border) !important;
+        }
+
+        .entry-section {
+            background: var(--surface);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+        }
+
+        .entry-section h3 {
+            margin: 0 0 1.25rem;
+            font-size: 1rem;
+            color: var(--text-dim);
+            text-align: center;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 1.25rem;
+            border-radius: 1rem;
+            border: 1px solid var(--border);
+            background: #0f172a;
+            color: white;
+            font-size: 1.1rem;
+            text-align: center;
+            font-family: inherit;
+            outline: none;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--primary);
+        }
+
+        .btn-submit {
+            padding: 1.25rem;
+            border-radius: 1rem;
+            border: none;
+            background: var(--primary);
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-submit:active {
+            transform: scale(0.97);
+        }
+
+        .history-section {
+            margin-top: 2.5rem;
+        }
+
+        .history-section h3 {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .history-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .history-item {
+            background: var(--surface);
+            padding: 1rem;
+            border-radius: 1rem;
+            margin-bottom: 0.5rem;
+            border: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .bib-id {
+            font-weight: 700;
+            color: var(--primary-light);
+            display: flex;
+            align-items: center;
+        }
+
+        .category-tag {
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 6px;
+            background: rgba(96, 165, 250, 0.2);
+            color: var(--primary-light);
+            font-weight: 700;
+            margin-right: 12px;
+            border: 1px solid rgba(96, 165, 250, 0.3);
+            letter-spacing: 0.05em;
+        }
+
+        .time {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+        }
+
+        .empty-history {
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            padding: 2rem;
+            border: 1px dashed var(--border);
+            border-radius: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>POSEIDON ATHENS HALF MARATHON</h1>
+        <p class="subtitle">Runner Check-In v2</p>
+    </header>
+
+    <div class="container">
+        <!-- Status Dashboard -->
+        <div id="status-card">
+            <span class="status-subtext">Scanner Status</span>
+            <p id="status-text">Ready to Scan</p>
+        </div>
+
+        <!-- Safe Scanner Container -->
+        <div id="reader"></div>
+
+        <!-- Manual Entry Dashboard -->
+        <div class="entry-section">
+            <h3>Manual BIB Entry</h3>
+            <div class="input-group">
+                <input type="text" id="manualBib" placeholder="ENTER BIB #" autocomplete="off">
+                <button class="btn-submit" onclick="submitManual()">CHECK-IN RUNNER</button>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="history-section">
+            <h3>Session History</h3>
+            <div id="history-container">
+                <div class="empty-history">No entries yet</div>
+                <ul class="history-list" id="history-list"></ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Supabase Configuration - UPDATE THESE FOR NEW PROJECT
+        const SUPABASE_URL = "https://cscsnwoclhllhhrzknlm.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_Nf0qt5vWXygecJPtomSHxQ_LJ8TM6Jo";
+        
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        const historyList = document.getElementById('history-list');
+        const emptyHistory = document.querySelector('.empty-history');
+        const statusText = document.getElementById('status-text');
+        const statusCard = document.getElementById('status-card');
+        const manualInput = document.getElementById('manualBib');
+
+        let sessionHistory = [];
+
+        function extractOrderId(input) {
+            if (input.includes("orderid=")) {
+                try {
+                    let afterId = input.split("orderid=")[1];
+                    return afterId.split("&")[0];
+                } catch (e) {
+                    return input;
+                }
+            }
+            return input;
+        }
+
+        function showStatus(message, type, duration = 3000) {
+            statusText.innerText = message;
+            statusCard.className = type;
+            
+            if (type !== 'loading') {
+                setTimeout(() => {
+                    statusText.innerText = "Ready to Scan Next";
+                    statusCard.className = "";
+                    if (html5QrcodeScanner.getState() === 3) {
+                        html5QrcodeScanner.resume();
+                    }
+                    manualInput.disabled = false;
+                    manualInput.focus();
+                }, duration);
+            }
+        }
+
+        function addToHistory(id, isValid, category) {
+            const now = new Date();
+            const timeStr = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+            sessionHistory.unshift({ id, time: timeStr, isValid, category });
+            if (sessionHistory.length > 5) sessionHistory.pop();
+            renderHistory();
+        }
+
+        function renderHistory() {
+            if (sessionHistory.length > 0 && emptyHistory) emptyHistory.style.display = 'none';
+            historyList.innerHTML = sessionHistory.map(item => `
+                <li class="history-item">
+                    <span class="bib-id">
+                        ${item.category ? `<span class="category-tag">${item.category}</span>` : ''}
+                        #${item.id}
+                    </span>
+                    <span class="time">${item.time}</span>
+                </li>
+            `).join('');
+        }
+
+        async function performCheckIn(idValue, source = 'scan') {
+            const cleanId = extractOrderId(idValue);
+            
+            statusText.innerText = "Verifying: " + cleanId;
+            statusCard.className = "loading";
+            manualInput.disabled = true;
+
+            try {
+                // 1. Find Participant from Master List
+                let query = supabaseClient.from('participants').select('*');
+                if (source === 'scan') {
+                    query = query.eq('order_id', cleanId);
+                } else {
+                    query = query.eq('bib_id', cleanId);
+                }
+                
+                const { data: participants, error: pError } = await query;
+                if (pError) throw pError;
+                
+                if (!participants || participants.length === 0) {
+                    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+                    showStatus("❌ NOT REGISTERED / INVALID", "invalid", 4000);
+                    return;
+                }
+                
+                const participant = participants[0];
+                const bib = participant.bib_id || "N/A";
+                const cat = participant.category || "";
+
+                // 2. Check for Duplicate in Check-ins
+                const { data: existing, error: cError } = await supabaseClient
+                    .from('checkins_v2')
+                    .select('scanned_at')
+                    .eq('participant_id', participant.id);
+                    
+                if (cError) throw cError;
+                
+                if (existing && existing.length > 0) {
+                    const time = new Date(existing[0].scanned_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    if (navigator.vibrate) navigator.vibrate([300, 300]);
+                    showStatus(`⚠️ ALREADY CHECKED IN AT ${time}`, "warning", 5000);
+                    return;
+                }
+                
+                // 3. Perform the Check-in
+                const { error: iError } = await supabaseClient
+                    .from('checkins_v2')
+                    .insert([{
+                        participant_id: participant.id,
+                        order_id: participant.order_id,
+                        bib_id: participant.bib_id,
+                        category: cat,
+                        source: source
+                    }]);
+                    
+                if (iError) throw iError;
+                
+                // Success feedback
+                if (navigator.vibrate) navigator.vibrate(100);
+                showStatus(`✅ SUCCESS: BIB ${bib} (${cat})`, "success", 3000);
+                addToHistory(bib, true, cat);
+                manualInput.value = "";
+
+            } catch (err) {
+                console.error("Database Error:", err);
+                showStatus("⚠️ SYSTEM ERROR: " + err.message, "invalid", 5000);
+            }
+        }
+
+        function onScanSuccess(decodedText) {
+            html5QrcodeScanner.pause();
+            performCheckIn(decodedText, 'scan');
+        }
+
+        function submitManual() {
+            const val = manualInput.value.trim();
+            if (val === "") return;
+            performCheckIn(val, 'manual');
+        }
+
+        // Initialize Scanner
+        const html5QrcodeScanner = new Html5QrcodeScanner("reader", {
+            fps: 15,
+            qrbox: { width: 250, height: 250 },
+            aspectRatio: 1.0,
+            showTorchButtonIfSupported: true,
+            rememberLastUsedCamera: true
+        });
+        html5QrcodeScanner.render(onScanSuccess);
+
+        // Auto focus manual input
+        window.addEventListener('load', () => manualInput.focus());
+
+    </script>
+</body>
+
+</html>
