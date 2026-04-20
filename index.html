@@ -372,6 +372,23 @@
             `).join('');
         }
 
+        // UPDATE THIS URL after deploying your Google Apps Script
+        const GOOGLE_SCRIPT_URL = ""; 
+
+        async function syncToGoogleSheets(data) {
+            if (!GOOGLE_SCRIPT_URL) return;
+            try {
+                fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    cache: 'no-cache',
+                    body: JSON.stringify(data)
+                });
+            } catch (err) {
+                console.warn("Google Sheets Sync Error:", err);
+            }
+        }
+
         async function performCheckIn(idValue, source = 'scan') {
             const cleanId = extractOrderId(idValue);
             
@@ -443,6 +460,16 @@
                         category: cat,
                         source: source
                     }]);
+
+                // 5. Sync to Google Sheets
+                syncToGoogleSheets({
+                    timestamp: new Date().toLocaleString(),
+                    name: participant.name || "Runner " + bib,
+                    bib_id: bib,
+                    order_id: participant.order_id,
+                    category: cat,
+                    status: "Picked up"
+                });
                 
                 // Success feedback
                 if (navigator.vibrate) navigator.vibrate(100);
