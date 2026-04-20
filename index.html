@@ -418,6 +418,18 @@
                 
                 if (!participants || participants.length === 0) {
                     if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+                    
+                    // Sync Error to Google Sheets
+                    syncToGoogleSheets({
+                        timestamp: new Date().toLocaleString(),
+                        name: "NOT REGISTERED",
+                        bib_id: source === 'manual' ? cleanId : "N/A",
+                        order_id: source === 'scan' ? cleanId : "N/A",
+                        category: "ERROR",
+                        status: "NOT REGISTERED",
+                        source: source
+                    });
+
                     showStatus("❌ NOT REGISTERED / INVALID", "invalid", 4000);
                     return;
                 }
@@ -430,6 +442,18 @@
                 // 2. Check current status
                 if (currentStatus === 'Picked up') {
                     const time = participant.picked_up_at ? new Date(participant.picked_up_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Recently";
+                    
+                    // Sync Duplicate attempt to Google Sheets
+                    syncToGoogleSheets({
+                        timestamp: new Date().toLocaleString(),
+                        name: participant.name || bib,
+                        bib_id: bib,
+                        order_id: participant.order_id,
+                        category: cat,
+                        status: `ALREADY PICKED UP (${time})`,
+                        source: source
+                    });
+
                     if (navigator.vibrate) navigator.vibrate([300, 300]);
                     showStatus(`⚠️ ALREADY PICKED UP AT ${time}`, "warning", 5000);
                     return;
