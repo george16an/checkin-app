@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title> POSEIDON ATHENS HALF MARATHON - CHECK-IN </title>
+    <title> POSEIDON ATHENS HALF MARATHON </title>
     <!-- Premium Typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,8 +21,6 @@
             --text: #f8fafc;
             --text-dim: #94a3b8;
             --success: #10b981;
-            --warning: #facc15;
-            --error: #ef4444;
         }
 
         * {
@@ -57,14 +55,6 @@
             letter-spacing: -0.02em;
         }
 
-        .subtitle {
-            color: var(--text-dim);
-            font-size: 0.9rem;
-            margin-top: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-        }
-
         .container {
             flex: 1;
             max-width: 500px;
@@ -81,24 +71,17 @@
             margin-bottom: 2rem;
             text-align: center;
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s ease;
         }
 
         #status-card.loading {
-            color: var(--warning);
-            border-color: var(--warning);
+            color: #facc15;
         }
 
         #status-card.success {
             color: #4ade80;
             border-color: #10b981;
             background: rgba(16, 185, 129, 0.1);
-        }
-
-        #status-card.warning {
-            color: #fbbf24;
-            border-color: #f59e0b;
-            background: rgba(245, 158, 11, 0.1);
         }
 
         #status-card.invalid {
@@ -121,6 +104,7 @@
             margin-bottom: 0.5rem;
         }
 
+        /* SAFE MODE SCANNER: No restrictive wrappers */
         #reader {
             width: 100%;
             border: 1px solid var(--border) !important;
@@ -179,11 +163,6 @@
             font-size: 1.1rem;
             text-align: center;
             font-family: inherit;
-            outline: none;
-        }
-
-        input[type="text"]:focus {
-            border-color: var(--primary);
         }
 
         .btn-submit {
@@ -232,8 +211,15 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .bib-id {
@@ -255,6 +241,12 @@
             letter-spacing: 0.05em;
         }
 
+        .category-tag.invalid-tag {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
         .time {
             font-size: 0.8rem;
             color: var(--text-dim);
@@ -274,13 +266,13 @@
 <body>
     <header>
         <h1>POSEIDON ATHENS HALF MARATHON</h1>
-        <p class="subtitle">Runner Check-In v2</p>
+        <p class="subtitle">Order Check-In</p>
     </header>
 
     <div class="container">
         <!-- Status Dashboard -->
         <div id="status-card">
-            <span class="status-subtext">Scanner Status</span>
+            <span class="status-subtext">Current Session Status</span>
             <p id="status-text">Ready to Scan</p>
         </div>
 
@@ -289,27 +281,28 @@
 
         <!-- Manual Entry Dashboard -->
         <div class="entry-section">
-            <h3>Manual BIB Entry</h3>
+            <h3>Manual Entry</h3>
             <div class="input-group">
-                <input type="text" id="manualBib" placeholder="ENTER BIB #" autocomplete="off">
-                <button class="btn-submit" onclick="submitManual()">CHECK-IN RUNNER</button>
+                <input type="text" id="manualBib" placeholder="BIB #" autocomplete="off">
+                <button class="btn-submit" onclick="submitManual()">CHECK-IN BIB</button>
             </div>
         </div>
 
         <!-- Recent Activity -->
         <div class="history-section">
-            <h3>Session History</h3>
+            <h3>Recent Checks</h3>
             <div id="history-container">
-                <div class="empty-history">No entries yet</div>
+                <div class="empty-history">No entries yet this session</div>
                 <ul class="history-list" id="history-list"></ul>
             </div>
         </div>
     </div>
 
     <script>
-        // Supabase Configuration - UPDATE THESE FOR NEW PROJECT
-        const SUPABASE_URL = "https://cscsnwoclhllhhrzknlm.supabase.co";
-        const SUPABASE_ANON_KEY = "sb_publishable_Nf0qt5vWXygecJPtomSHxQ_LJ8TM6Jo";
+        // Supabase Configuration
+        const SUPABASE_URL = "https://viftrlmjafotgehkxsto.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZpZnRybG1qYWZvdGdlaGt4c3RvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxOTIzMjEsImV4cCI6MjA5MTc2ODMyMX0.tx7PanV9UPTN2IAmGg1QtAfvNmqRYfJOqyb09OIm3ks";
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzxmoTaGviHuXOf8ETEz50XA3mP0qQl-Y7JEuXL1nbfCYC9A-BK8HVpHdgnlPmjs3U/exec";
         
         const { createClient } = supabase;
         const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -322,6 +315,7 @@
 
         let sessionHistory = [];
 
+        // Logic from your working version
         function extractOrderId(input) {
             if (input.includes("orderid=")) {
                 try {
@@ -334,27 +328,38 @@
             return input;
         }
 
-        function showStatus(message, type, duration = 3000) {
-            statusText.innerText = message;
-            statusCard.className = type;
+        function getCategory(id, source = 'scan') {
+            const firstDigit = id.charAt(0);
             
-            if (type !== 'loading') {
-                setTimeout(() => {
-                    statusText.innerText = "Ready to Scan Next";
-                    statusCard.className = "";
-                    if (html5QrcodeScanner.getState() === 3) {
-                        html5QrcodeScanner.resume();
-                    }
-                    manualInput.disabled = false;
-                    manualInput.focus();
-                }, duration);
+            if (source === 'scan') {
+                const scanMapping = {
+                    '1': 'HM',
+                    '2': 'RC',
+                    '3': 'QM',
+                    '4': '5k',
+                    '5': 'pw',
+                    '6': 'kids',
+                    '7': 'ALMA'
+                };
+                return scanMapping[firstDigit] || 'UNK';
+            } else {
+                // BIB Mapping
+                const bibMapping = {
+                    '1': 'QM',
+                    '2': 'HM', // User also mentioned ALMA 2
+                    '3': 'KIDS',
+                    '4': 'PW',
+                    '5': '5k'
+                };
+                if (firstDigit === '2') return 'HM'; // or 'ALMA' depending on preference
+                return bibMapping[firstDigit] || 'BIB';
             }
         }
 
-        function addToHistory(id, isValid, category) {
+        function addToHistory(idValue, isValid = true, category = '') {
             const now = new Date();
             const timeStr = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
-            sessionHistory.unshift({ id, time: timeStr, isValid, category });
+            sessionHistory.unshift({ id: idValue, time: timeStr, isValid, category });
             if (sessionHistory.length > 5) sessionHistory.pop();
             renderHistory();
         }
@@ -362,114 +367,128 @@
         function renderHistory() {
             if (sessionHistory.length > 0 && emptyHistory) emptyHistory.style.display = 'none';
             historyList.innerHTML = sessionHistory.map(item => `
-                <li class="history-item">
+                <li class="history-item" style="${!item.isValid ? 'border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.05);' : ''}">
                     <span class="bib-id">
-                        ${item.category ? `<span class="category-tag">${item.category}</span>` : ''}
-                        #${item.id}
+                        ${item.category ? `<span class="category-tag ${!item.isValid ? 'invalid-tag' : ''}">${item.category}</span>` : ''}
+                        #${item.id.substring(0, 10)}${item.id.length > 10 ? '...' : ''}
                     </span>
                     <span class="time">${item.time}</span>
                 </li>
             `).join('');
         }
 
-        async function performCheckIn(idValue, source = 'scan') {
+        async function sendToDatabase(idValue, source = 'scan') {
             const cleanId = extractOrderId(idValue);
             
-            statusText.innerText = "Verifying: " + cleanId;
+            // Validation & Category logic
+            let isValid = true;
+            let category = getCategory(cleanId, source);
+            
+            if (source === 'scan') {
+                isValid = cleanId.endsWith('26');
+            }
+
+            // UI Feedback
+            statusText.innerText = "Syncing: " + (cleanId.length > 8 ? cleanId.substring(0, 8) + "..." : cleanId);
             statusCard.className = "loading";
             manualInput.disabled = true;
 
             try {
-                console.log("Attempting lookup for:", cleanId, "via", source);
-                
-                // 1. Find Participant from Master List
-                let query = supabaseClient.from('participants').select('*');
-                if (source === 'scan') {
-                    query = query.eq('order_id', cleanId);
-                } else {
-                    query = query.eq('bib_id', cleanId);
-                }
-                
-                const { data: participants, error: pError } = await query;
-                
-                if (pError) {
-                    console.error("Supabase Lookup Error:", pError);
-                    throw pError;
-                }
-                
-                console.log("Participant data found:", participants);
-                
-                if (!participants || participants.length === 0) {
-                    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-                    showStatus("❌ NOT REGISTERED / INVALID", "invalid", 4000);
-                    return;
-                }
-                
-                const participant = participants[0];
-                const bib = participant.bib_id || "N/A";
-                const cat = participant.category || "";
-                const currentStatus = participant.status || "Ready for pickup";
+                const payload = {
+                    category: category
+                };
 
-                // 2. Check current status
-                if (currentStatus === 'Picked up') {
-                    const time = participant.picked_up_at ? new Date(participant.picked_up_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Recently";
-                    if (navigator.vibrate) navigator.vibrate([300, 300]);
-                    showStatus(`⚠️ ALREADY PICKED UP AT ${time}`, "warning", 5000);
-                    return;
+                if (source === 'scan') {
+                    payload.order_id = cleanId;
+                    payload.is_valid = isValid;
+                } else {
+                    payload.bib_id = cleanId;
+                    payload.is_valid = true; // Manual BIBs are valid by default
+                }
+
+                const { data, error } = await supabaseClient
+                    .from('checkins')
+                    .insert([payload])
+                    .select();
+
+                console.log("Supabase Response:", { data, error });
+
+                // Background Sync to Google Sheets
+                try {
+                    // Send as text/plain to avoid preflight issues with no-cors
+                    fetch(GOOGLE_SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        cache: 'no-cache',
+                        body: JSON.stringify({ ...payload, source: source })
+                    });
+                } catch (gRes) {
+                    console.warn("Google Sheets Sync Error:", gRes);
+                }
+
+                if (error) {
+                    if (error.message.includes('column "category" does not exist') || 
+                        error.message.includes('column "is_valid" does not exist')) {
+                        throw new Error("Supabase columns 'category' or 'is_valid' missing. Please run the SQL setup.");
+                    }
+                    throw error;
+                }
+
+                if (navigator.vibrate) {
+                    if (!isValid && source === 'scan') {
+                        navigator.vibrate([200, 100, 200]);
+                    } else {
+                        navigator.vibrate([100]);
+                    }
                 }
                 
-                // 3. Perform the Update (Mark as Picked Up)
-                console.log("Updating status for participant:", participant.id);
-                const { error: uError } = await supabaseClient
-                    .from('participants')
-                    .update({ 
-                        status: 'Picked up', 
-                        picked_up_at: new Date().toISOString() 
-                    })
-                    .eq('id', participant.id);
-                    
-                if (uError) {
-                    console.error("Supabase Update Error:", uError);
-                    throw uError;
+                addToHistory(cleanId, isValid, category);
+
+                if (source === 'scan' && !isValid) {
+                    statusText.innerText = "❌ NOT VALID: " + category;
+                    statusCard.className = "invalid";
+                } else {
+                    statusText.innerText = `✅ RECORDED (${category})`;
+                    statusCard.className = "success";
                 }
                 
-                // 4. Log to checkins_v2 for history
-                await supabaseClient
-                    .from('checkins_v2')
-                    .insert([{
-                        participant_id: participant.id,
-                        order_id: participant.order_id,
-                        bib_id: participant.bib_id,
-                        category: cat,
-                        source: source
-                    }]);
-                
-                // Success feedback
-                if (navigator.vibrate) navigator.vibrate(100);
-                showStatus(`✅ SUCCESS: ${participant.name || bib} PICKED UP`, "success", 3000);
-                addToHistory(bib, true, cat);
                 manualInput.value = "";
+                manualInput.disabled = false;
+
+                setTimeout(() => {
+                    statusText.innerText = "Ready to Scan Next";
+                    statusCard.className = "";
+                    if (html5QrcodeScanner.getState() === 3) {
+                        html5QrcodeScanner.resume();
+                    }
+                    manualInput.focus();
+                }, !isValid && source === 'scan' ? 3500 : 2000);
 
             } catch (err) {
-                console.error("Full Error Object:", err);
-                let errMsg = err.message || "Unknown Error";
-                if (errMsg === "Failed to fetch") errMsg = "Network Error (Check Adblocker/Internet)";
-                showStatus("⚠️ SYSTEM ERROR: " + errMsg, "invalid", 5000);
+                console.error("Database Error:", err);
+                statusText.innerText = "⚠️ Error: " + (err.message || "Unknown");
+                statusCard.className = "";
+                manualInput.disabled = false;
+                
+                setTimeout(() => {
+                    statusText.innerText = "Ready to Scan";
+                    if (html5QrcodeScanner.getState() === 3) html5QrcodeScanner.resume();
+                }, 5000);
             }
         }
 
         function onScanSuccess(decodedText) {
             html5QrcodeScanner.pause();
-            performCheckIn(decodedText, 'scan');
+            sendToDatabase(decodedText, 'scan');
         }
 
         function submitManual() {
             const val = manualInput.value.trim();
             if (val === "") return;
-            performCheckIn(val, 'manual');
+            sendToDatabase(val, 'manual');
         }
 
-        // Initialize Scanner
+        // Initialize with your working config
         const html5QrcodeScanner = new Html5QrcodeScanner("reader", {
             fps: 15,
             qrbox: { width: 250, height: 250 },
